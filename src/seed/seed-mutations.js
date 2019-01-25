@@ -27,5 +27,8 @@ export default /* GraphQL */ `
     r3: CreateRole(id: "202", sysname: "stranger") {
       id
     }
+    n1: CreateCounter(id: "1", name: "Counter") {
+      id
+    }
   }
 `;
