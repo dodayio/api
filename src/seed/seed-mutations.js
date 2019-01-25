@@ -1,4 +1,4 @@
-export default /* GraphQL */ `
+export default /* GraphQL seed db */ `
   mutation {
     c1: CreateCategory(id: "100", sysname: "health") {
       id
