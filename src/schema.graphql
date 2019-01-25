@@ -1,0 +1,87 @@
+type Hero {
+  id: ID!
+  name: String
+  friends: [Hero] @relation(name: "FRIENDS", direction: "BOTH")
+  invites: [Hero] @relation(name: "INVITE", direction: "OUT")
+  createdDodays: [Doday] @relation(name: "CREATE", direction: "OUT")
+  dodays: [Doing]
+  categories: [Category] @relation(name: "CATEGORY", direction: "OUT")
+  roles: [Role] @relation(name: "HAS_ROLE", direction: "OUT")
+  created: Float
+}
+
+type Doday {
+  id: ID!
+  name: String
+  owner: [Hero] @relation(name: "CREATE", direction: "IN")
+  doing: [Hero] @relation(name: "DOING", direction: "BOTH")
+  done: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(h:Hero) RETURN h")
+  categories: [Category] @relation(name: "IN", direction: "OUT")
+  tags: [Tag] @relation(name: "HAS", direction: "OUT")
+  created: Float
+}
+
+type Path {
+  id: ID!
+  name: String
+  dodays: [Doday] @relation(name: "INCLUDE", direction: "IN")
+  created: Float
+}
+
+type Tag {
+  id: ID!
+  name: String
+}
+
+type Role {
+  id: ID!
+  sysname: String
+  members: [Hero] @relation(name: "HAS_ROLE", direction: "IN")
+}
+
+type Category {
+  id: ID!
+  sysname: String
+  heroes: [Hero] @relation(name: "CATEGORY", direction: "IN")
+  dodays: [Doday] @relation(name: "IN", direction: "IN")
+}
+
+type Doing @relation(name: "DOING") {
+  from: Hero
+  to: Doday
+  tookAt: DateTime
+  completedAt: Float
+  completed: Boolean
+}
+
+type Counter {
+  id: ID!
+  name: String
+  heroes: Int @cypher(statement: "MATCH (h:Hero) RETURN count(h)")
+}
+
+type Query {
+  dodaysBySubstring(substring: String): [Doday]
+    @cypher(
+      statement: "MATCH (u:Doday) WHERE u.title CONTAINS $substring RETURN u"
+    )
+  activeDodays(heroID: ID): [Doday]
+    @cypher(
+      statement: "MATCH (d:Doday)-[:DOING]-(h:Hero) WHERE h.id = $heroID RETURN d"
+    )
+  allRoles(sysname: String): [Role]
+    @cypher(
+      statement: "MATCH (n:Role) RETURN n"
+    )
+  allCategories(sysname: String): [Category]
+    @cypher(
+      statement: "MATCH (n:Category) RETURN n"
+    )
+}
+
+type Mutation {
+  completeDoday(heroID: ID, dodayID: ID, date: Float): Doday
+      @cypher(
+        statement: "MATCH (h:Hero { id: $heroID })-[r:DOING]-(d:Doday { id: $dodayID }) SET r.completed = true SET r.completedAt = $date RETURN d"
+      )
+}
