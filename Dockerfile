@@ -21,4 +21,3 @@ WORKDIR /var/www/api
 # Expose a port and start the server (you may need to change the name here to match your server file)
 EXPOSE 4000
 CMD ["./node_modules/.bin/babel-node", "./src/index.js"]
-view raw
