@@ -4,7 +4,6 @@
   "description": "API app for GRANDstack",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./node_modules/.bin/babel-node src/index.js",
     "seed": "./node_modules/.bin/babel-node src/seed/seed-db.js"
   },
