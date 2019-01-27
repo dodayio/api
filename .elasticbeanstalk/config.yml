@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: api-production
+    environment: production
 global:
   application_name: api
   default_ec2_keyname: null
