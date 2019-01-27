@@ -1,12 +1,24 @@
-FROM node:10
+# Load the alpine base image
+FROM alpine:3.7
 
-RUN mkdir -p /app
-WORKDIR /app
+# Install depedencies
+RUN apk update && apk add -U nodejs yarn
+RUN node --version
+RUN yarn --version
 
-COPY package.json .
-RUN npm install
-COPY . .
+# Create the working directory
+RUN mkdir -p /var/www/api
 
+# Copy project files into the working directory
+COPY . /var/www/api/
+
+# Run npm install to download all the project dependencies
+RUN cd /var/www/api && yarn
+
+# Set the working directory to the created directory
+WORKDIR /var/www/api
+
+# Expose a port and start the server (you may need to change the name here to match your server file)
 EXPOSE 4000
-
-CMD ["npm", "start"]
+CMD ["./node_modules/.bin/babel-node", "./src/index.js"]
+view raw
