@@ -1,4 +1,6 @@
-type Hero {
+directive @isAuthenticated on OBJECT | FIELD_DEFINITION
+
+type Hero @isAuthenticated {
   id: ID!
   name: String
   friends: [Hero] @relation(name: "FRIENDS", direction: "BOTH")
