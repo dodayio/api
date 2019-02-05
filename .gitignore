@@ -11,6 +11,7 @@ node_modules/
 
 # misc
 .DS_Store
+doday.pem
 .env
 .env.local
 .env.development.local

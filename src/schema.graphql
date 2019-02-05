@@ -67,7 +67,7 @@ type Query {
     @cypher(
       statement: "MATCH (u:Doday) WHERE u.title CONTAINS $substring RETURN u"
     )
-  activeDodays(heroID: ID): [Doday]
+  activeDodays(heroID: ID): [Doday] @isAuthenticated
     @cypher(
       statement: "MATCH (d:Doday)-[:DOING]-(h:Hero) WHERE h.id = $heroID RETURN d"
     )
@@ -82,6 +82,7 @@ type Query {
 }
 
 type Mutation {
+  CreateHero(id: ID, name: String): Hero @isAuthenticated
   completeDoday(heroID: ID, dodayID: ID, date: Float): Doday
       @cypher(
         statement: "MATCH (h:Hero { id: $heroID })-[r:DOING]-(d:Doday { id: $dodayID }) SET r.completed = true SET r.completedAt = $date RETURN d"
