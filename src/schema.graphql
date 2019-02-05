@@ -1,12 +1,11 @@
 directive @isAuthenticated on OBJECT | FIELD_DEFINITION
 
-type Hero @isAuthenticated {
+type Hero {
   id: ID!
   name: String
   friends: [Hero] @relation(name: "FRIENDS", direction: "BOTH")
   invites: [Hero] @relation(name: "INVITE", direction: "OUT")
   createdDodays: [Doday] @relation(name: "CREATE", direction: "OUT")
-  dodays: [Doing]
   categories: [Category] @relation(name: "CATEGORY", direction: "OUT")
   roles: [Role] @relation(name: "HAS_ROLE", direction: "OUT")
   created: Float
@@ -16,17 +15,20 @@ type Doday {
   id: ID!
   name: String
   owner: [Hero] @relation(name: "CREATE", direction: "IN")
-  doing: [Hero] @relation(name: "DOING", direction: "BOTH")
-  done: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(h:Hero) RETURN h")
+  doing: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: false }]-(p:Progress)-(h:Hero) RETURN h")
+  done: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(p:Progress)-(h:Hero) RETURN h")
   categories: [Category] @relation(name: "IN", direction: "OUT")
   tags: [Tag] @relation(name: "HAS", direction: "OUT")
   created: Float
+  completed: Boolean
+  tookAt: DateTime
+  completedAt: Float
 }
 
 type Path {
   id: ID!
   name: String
-  dodays: [Doday] @relation(name: "INCLUDE", direction: "IN")
+  dodays: [Doday] @relation(name: "USE", direction: "IN")
   created: Float
 }
 
@@ -48,8 +50,19 @@ type Category {
   dodays: [Doday] @relation(name: "IN", direction: "IN")
 }
 
+type Progress {
+  id: ID!
+  type: String
+  days: [Int]
+  hero: [Hero] @relation(name: "PROGRESS", direction: "IN")
+  path: [Path] @relation(name: "PATH", direction: "OUT")
+  doing: [Doing]
+  currentDoday: [Doday] @cypher(statement: "MATCH (this)-[r:DOING { completed: false }]-(d: Doday) RETURN d")
+  completedDodays: [Doday] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(d: Doday) RETURN d")
+}
+
 type Doing @relation(name: "DOING") {
-  from: Hero
+  from: Progress
   to: Doday
   tookAt: DateTime
   completedAt: Float
@@ -67,9 +80,9 @@ type Query {
     @cypher(
       statement: "MATCH (u:Doday) WHERE u.title CONTAINS $substring RETURN u"
     )
-  activeDodays(heroID: ID): [Doday] @isAuthenticated
+  activeDodays(heroID: ID): [Doday]
     @cypher(
-      statement: "MATCH (d:Doday)-[:DOING]-(h:Hero) WHERE h.id = $heroID RETURN d"
+      statement: "MATCH (d:Doday)-[r:DOING]-()-[]-(h:Hero) WHERE h.id = $heroID RETURN d { .id, .name, completed: r.completed, completedAt: r.completedAt, tookAt: r.tookAt } as Doday"
     )
   allRoles(sysname: String): [Role]
     @cypher(
@@ -82,9 +95,10 @@ type Query {
 }
 
 type Mutation {
-  CreateHero(id: ID, name: String): Hero @isAuthenticated
-  completeDoday(heroID: ID, dodayID: ID, date: Float): Doday
-      @cypher(
-        statement: "MATCH (h:Hero { id: $heroID })-[r:DOING]-(d:Doday { id: $dodayID }) SET r.completed = true SET r.completedAt = $date RETURN d"
-      )
+  CreateHero(id: ID, name: String): Hero
+  CreateDoday(id: ID, name: String, created: Float): Doday
+  toggleDoday(heroID: ID, dodayID: ID, date: Float, value: Boolean): Doday
+    @cypher(
+      statement: "MATCH (h:Hero { id: $heroID })-[]-()-[r:DOING]-(d:Doday { id: $dodayID }) SET r.completed = $value SET r.completedAt = $date RETURN d"
+    )
 }
