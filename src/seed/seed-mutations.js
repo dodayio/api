@@ -1,21 +1,21 @@
 export default /* GraphQL seed db */ `
   mutation {
-    c1: CreateCategory(id: "100", sysname: "health") {
+    c1: CreateTag(id: "100", sysname: "health") {
       id
     }
-    c2: CreateCategory(id: "101", sysname: "selfdev") {
+    c2: CreateTag(id: "101", sysname: "selfdev") {
       id
     }
-    c3: CreateCategory(id: "102", sysname: "career") {
+    c3: CreateTag(id: "102", sysname: "career") {
       id
     }
-    c4: CreateCategory(id: "103", sysname: "relationship") {
+    c4: CreateTag(id: "103", sysname: "relationship") {
       id
     }
-    c5: CreateCategory(id: "104", sysname: "prosperity") {
+    c5: CreateTag(id: "104", sysname: "prosperity") {
       id
     }
-    c6: CreateCategory(id: "105", sysname: "hobby") {
+    c6: CreateTag(id: "105", sysname: "hobby") {
       id
     }
     r1: CreateRole(id: "200", sysname: "founder") {

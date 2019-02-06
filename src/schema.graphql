@@ -6,7 +6,7 @@ type Hero {
   friends: [Hero] @relation(name: "FRIENDS", direction: "BOTH")
   invites: [Hero] @relation(name: "INVITE", direction: "OUT")
   createdDodays: [Doday] @relation(name: "CREATE", direction: "OUT")
-  categories: [Category] @relation(name: "CATEGORY", direction: "OUT")
+  tags: [TaggedHero]
   roles: [Role] @relation(name: "HAS_ROLE", direction: "OUT")
   created: Float
 }
@@ -17,8 +17,7 @@ type Doday {
   owner: [Hero] @relation(name: "CREATE", direction: "IN")
   doing: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: false }]-(p:Progress)-(h:Hero) RETURN h")
   done: [Hero] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(p:Progress)-(h:Hero) RETURN h")
-  categories: [Category] @relation(name: "IN", direction: "OUT")
-  tags: [Tag] @relation(name: "HAS", direction: "OUT")
+  tags: [TaggedDoday]
   created: Float
   completed: Boolean
   tookAt: DateTime
@@ -32,22 +31,23 @@ type Path {
   created: Float
 }
 
-type Tag {
-  id: ID!
-  name: String
-}
-
 type Role {
   id: ID!
   sysname: String
   members: [Hero] @relation(name: "HAS_ROLE", direction: "IN")
 }
 
-type Category {
+type Tag {
   id: ID!
   sysname: String
-  heroes: [Hero] @relation(name: "CATEGORY", direction: "IN")
-  dodays: [Doday] @relation(name: "IN", direction: "IN")
+  heroes: [Hero] @cypher(statement: "MATCH (this)-[:HAS_TAG]-(h:Hero) RETURN h")
+  dodays: [Doday] @cypher(statement: "MATCH (this)-[:HAS_TAG]-(d:Doday) RETURN d")
+  weight: Float @cypher(statement:
+    """
+    MATCH (this)-[h:HAS_TAG]-()
+    RETURN toFloat(sum(h.weight))
+    """
+  )
 }
 
 type Progress {
@@ -59,6 +59,18 @@ type Progress {
   doing: [Doing]
   currentDoday: [Doday] @cypher(statement: "MATCH (this)-[r:DOING { completed: false }]-(d: Doday) RETURN d")
   completedDodays: [Doday] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(d: Doday) RETURN d")
+}
+
+type TaggedDoday @relation(name: "HAS_TAG") {
+  from: Doday
+  to: Tag
+  weight: Float
+}
+
+type TaggedHero @relation(name: "HAS_TAG") {
+  from: Hero
+  to: Tag
+  weight: Float
 }
 
 type Doing @relation(name: "DOING") {
@@ -88,9 +100,9 @@ type Query {
     @cypher(
       statement: "MATCH (n:Role) RETURN n"
     )
-  allCategories(sysname: String): [Category]
+  allTags(sysname: String): [Tag]
     @cypher(
-      statement: "MATCH (n:Category) RETURN n"
+      statement: "MATCH (n:Tag) RETURN n"
     )
 }
 
