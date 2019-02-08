@@ -6,7 +6,14 @@ type Hero {
   friends: [Hero] @relation(name: "FRIENDS", direction: "BOTH")
   invites: [Hero] @relation(name: "INVITE", direction: "OUT")
   createdDodays: [Doday] @relation(name: "CREATE", direction: "OUT")
-  tags: [TaggedHero]
+  tags: [HeroTag] @cypher(
+    statement:
+    """
+    MATCH p = (h: Hero)-[]-()-[:DOING { completed: true }]-()-[tagged:HAS_TAG]-(t: Tag)
+    WHERE h.id = this.id
+    RETURN t { .id, .sysname, weight: sum(tagged.weight) } as HeroTag
+    """
+  )
   roles: [Role] @relation(name: "HAS_ROLE", direction: "OUT")
   created: Float
 }
@@ -67,9 +74,9 @@ type TaggedDoday @relation(name: "HAS_TAG") {
   weight: Float
 }
 
-type TaggedHero @relation(name: "HAS_TAG") {
-  from: Hero
-  to: Tag
+type HeroTag {
+  id: ID!
+  sysname: String
   weight: Float
 }
 
