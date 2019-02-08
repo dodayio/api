@@ -11,7 +11,7 @@ type Hero {
     """
     MATCH p = (h: Hero)-[]-()-[:DOING { completed: true }]-()-[tagged:HAS_TAG]-(t: Tag)
     WHERE h.id = this.id
-    RETURN t { .id, .sysname, weight: sum(tagged.weight) } as HeroTag
+    RETURN t { .id, .sysname, .color, weight: sum(tagged.weight) } as HeroTag
     """
   )
   roles: [Role] @relation(name: "HAS_ROLE", direction: "OUT")
@@ -77,6 +77,7 @@ type TaggedDoday @relation(name: "HAS_TAG") {
 type HeroTag {
   id: ID!
   sysname: String
+  color: String
   weight: Float
 }
 
