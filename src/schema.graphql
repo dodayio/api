@@ -68,6 +68,12 @@ type Progress {
   completedDodays: [Doday] @cypher(statement: "MATCH (this)-[r:DOING { completed: true }]-(d: Doday) RETURN d")
 }
 
+type Day {
+  id: ID!
+  date: Date
+  active: Boolean
+}
+
 type TaggedDoday @relation(name: "HAS_TAG") {
   from: Doday
   to: Tag

@@ -4,6 +4,31 @@ import { v1 as neo4j } from "neo4j-driver";
 import { makeAugmentedSchema } from "neo4j-graphql-js";
 import { IsAuthenticatedDirective, HasRoleDirective } from "./directives";
 import dotenv from "dotenv";
+const fetch = require('node-fetch');
+const { getMetadata } = require('page-metadata-parser');
+const domino = require('domino');
+
+async function parseURL(url) {
+  const response = await fetch(url);
+  const html = await response.text();
+  const doc = domino.createWindow(html).document;
+  return await getMetadata(doc, url);
+}
+
+const metadata = parseURL('https://www.youtube.com/watch?v=9ptNxUH-lfY&list=PLNG6BIg2XJxBPMDNpPW8RBLRhJ9ZUIEtM');
+
+console.log(metadata.then((value) => console.log(value)));
+
+const express = require('express');
+
+const app = express();
+const port = 8080;
+
+app.get('/', (req, res) => {
+
+});
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 // set environment variables from ../.env
 dotenv.config();
