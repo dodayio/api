@@ -28,6 +28,7 @@ type Doday {
   created: Float
   completed: Boolean
   tookAt: DateTime
+  date: Date
   completedAt: Float
 }
 
@@ -106,12 +107,12 @@ type Query {
     @cypher(
       statement: "MATCH (u:Doday) WHERE u.title CONTAINS $substring RETURN u"
     )
-  activeDodays(heroID: ID): [Doday]
+  activeDodays(heroID: ID, date: String): [Doday]
     @cypher(
       statement:
       """
       MATCH (d:Doday)-[r:DOING]-()-[]-(h:Hero)
-      WHERE h.id = $heroID
+      WHERE h.id = $heroID AND d.date = date($date)
       RETURN d { .id, .name, completed: r.completed, completedAt: r.completedAt, tookAt: r.tookAt } as Doday
       ORDER BY r.completed
       """
@@ -128,7 +129,6 @@ type Query {
 
 type Mutation {
   CreateHero(id: ID, name: String): Hero
-  CreateDoday(id: ID, name: String, created: Float): Doday
   toggleDoday(heroID: ID, dodayID: ID, date: Float, value: Boolean): Doday
     @cypher(
       statement: 
