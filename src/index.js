@@ -4,6 +4,7 @@ import { v1 as neo4j } from "neo4j-driver";
 import { makeAugmentedSchema } from "neo4j-graphql-js";
 import { IsAuthenticatedDirective, HasRoleDirective } from "./directives";
 import dotenv from "dotenv";
+import transactions from './transactions';
 const fetch = require('node-fetch');
 const { getMetadata } = require('page-metadata-parser');
 const domino = require('domino');
@@ -23,10 +24,6 @@ const express = require('express');
 
 const app = express();
 const port = 8080;
-
-app.get('/', (req, res) => {
-
-});
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
@@ -57,10 +54,27 @@ const schema = makeAugmentedSchema({
 const driver = neo4j.driver(
   process.env.NEO4J_URI || "bolt://localhost:7687",
   neo4j.auth.basic(
-    process.env.NEO4J_USER || "neo4j",
-    process.env.NEO4J_PASSWORD || "neo4j"
+    "doday",
+    "doday"
   )
 );
+
+app.get('/', (req, res) => {
+
+});
+
+app.post('/heroes', (req, res) => {
+  const session = driver.session(neo4j.WRITE);
+  console.log(req.body);
+  // const first = session.writeTransaction(tx => transactions.heroes.createHero(tx, req.body)).then(
+  //   () => session.writeTransaction(tx => addPerson(tx, 'Alice'))).then(
+  //   () => session.writeTransaction(tx => addEmployee(tx, 'Alice', 'Wayne Enterprises'))).then(
+  //   () => {
+  //     savedBookmarks.push(session.lastBookmark());
+
+  //     return session.close();
+  //   });
+});
 
 /*
  * Create a new ApolloServer instance, serving the GraphQL schema
@@ -78,6 +92,6 @@ const server = new ApolloServer({
   schema
 });
 
-server.listen(process.env.GRAPHQL_LISTEN_PORT, "0.0.0.0").then(({ url }) => {
+server.listen(process.env.GRAPHQL_LISTEN_PORT || 4040, "0.0.0.0").then(({ url }) => {
   console.log(`GraphQL API ready at ${url}`);
 });
