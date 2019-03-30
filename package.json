@@ -19,8 +19,6 @@
     "watch-test": "npm run test -- --watchAll",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "build-sass": "node-sass src/public/css/main.scss dist/public/css/main.css",
-    "watch-sass": "node-sass -w src/public/css/main.scss dist/public/css/main.css",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "copy-static-assets": "ts-node copyStaticAssets.ts",
     "debug": "npm run build && npm run watch-debug",
@@ -100,18 +98,6 @@
     "ts-jest": "^22.0.4",
     "ts-node": "^5.0.0",
     "tslint": "^5.9.1",
-    "husky": "^1.2.0",
     "typescript": "^2.7.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,json,css,md,graphql": [
-      "prettier --write",
-      "git add"
-    ]
   }
 }
